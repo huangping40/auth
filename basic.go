@@ -29,8 +29,11 @@ func Basic(username string, password string) martini.Handler {
 
 // BasicFunc returns a Handler that authenticates via Basic Auth using the provided function.
 // The function should return true for a valid username/password combination.
-func BasicFunc(authfn func(string, string) bool) martini.Handler {
+func BasicFunc(pathPrefix *string, authfn func(string, string) bool) martini.Handler {
 	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
+		if !strings.HasPrefix(req.URL.Path, *pathPrefix) {
+			return
+		}
 		auth := req.Header.Get("Authorization")
 		if len(auth) < 6 || auth[:6] != "Basic " {
 			unauthorized(res)
